@@ -33,11 +33,16 @@ uv install -r requirements.txt
 
 Download e.g. https://git.nfdi4plants.org/brilator/Facultative-CAM-in-Talinum/-/package_files/89873/download, copy into this folder and rename to `ro-crate-metadata.json`. Then run:
 
-```
-uv run .\rdf-tools.py
+```powershell
+uv run .\scripts\jsonld-to-ttl.py
 ```
 
-This writes `ro-crate-metadata.ttl`. RDFLib reads the JSON-LD context and
+Run this command from the project root. By default, the script reads
+`ro-crate-metadata.json` from the project root and writes
+`ro-crate-metadata.ttl` alongside it, regardless of your working directory.
+Explicit input and output paths are relative to your working directory.
+
+RDFLib reads the JSON-LD context and
 preserves RDF types, links, literals, and the inline vocabulary extensions.
 Internet access is needed to retrieve remote contexts such as the RO-Crate 1.1
 context used by the example metadata.
@@ -45,7 +50,7 @@ context used by the example metadata.
 For portable resource identifiers, specify the metadata document's absolute IRI:
 
 ```powershell
-uv run rdf-tools.py ro-crate-metadata.json -o crate.ttl --base https://example.org/crate/ro-crate-metadata.json
+uv run .\scripts\jsonld-to-ttl.py ro-crate-metadata.json -o crate.ttl --base https://example.org/crate/ro-crate-metadata.json
 ```
 
 Relative IDs such as `./`, file paths, and `#fragment` are resolved against this
@@ -53,6 +58,16 @@ IRI. Without `--base`, they use the input file's absolute `file:` URI. Turtle is
 written as UTF-8 with absolute resource identifiers.
 
 ### Load the Turtle into Apache Jena Fuseki
+
+#### Curl
+
+curl.exe --fail-with-body -X POST `
+  -H "Content-Type: text/turtle" `
+  --data-binary "@.\ro-crate-metadata.ttl" `
+  "http://localhost:3030/ds/data?default"
+
+
+#### TBD2
 
 Load the Turtle into Apache Jena TDB2 using the Jena binary distribution:
 
@@ -63,3 +78,13 @@ tdb2_tdbloader --loc DB ro-crate-metadata.ttl
 On Linux/macOS the command is `tdb2.tdbloader`. To load into a named graph,
 add `--graph=https://example.org/graph`. See the
 [Jena TDB2 command-line documentation](https://jena.apache.org/documentation/tdb2/tdb2_cmds.html).
+
+
+### Query the RDF store
+
+```powershell
+curl.exe --fail-with-body `        
+  -H "Accept: application/sparql-results+json" `   
+  --data-urlencode "query=SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 10" `                
+  "http://localhost:3030/ds/query"
+```

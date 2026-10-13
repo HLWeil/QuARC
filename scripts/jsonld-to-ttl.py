@@ -7,6 +7,9 @@ from urllib.parse import urlsplit
 from rdflib import Graph
 
 
+DEFAULT_INPUT = Path(__file__).resolve().parents[1] / "ro-crate-metadata.json"
+
+
 def convert_to_turtle(source: Path, destination: Path, base_iri: str | None = None) -> int:
     """Expand JSON-LD and write UTF-8 Turtle with absolute resource identifiers."""
     source = source.resolve()
@@ -26,8 +29,8 @@ def convert_to_turtle(source: Path, destination: Path, base_iri: str | None = No
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "input", nargs="?", type=Path, default=Path("ro-crate-metadata.json"),
-        help="RO-Crate metadata file (default: ro-crate-metadata.json)",
+        "input", nargs="?", type=Path, default=DEFAULT_INPUT,
+        help="RO-Crate metadata file (default: ro-crate-metadata.json in the project root)",
     )
     parser.add_argument(
         "-o", "--output", type=Path,
