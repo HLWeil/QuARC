@@ -1,1 +1,2 @@
 rdflib>=7.1,<8
+datahub-client>=0.7.0

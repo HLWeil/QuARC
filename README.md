@@ -29,6 +29,28 @@ python -m venv .venv
 uv install -r requirements.txt
 ```
 
+### Fill the database from ARC IDs
+
+With Fuseki running and updates enabled, process the `arc_ids` list in
+`scripts/fill-db.py`:
+
+```powershell
+uv run .\scripts\fill-db.py
+```
+
+For each ARC, the script downloads its RO-Crate JSON-LD, runs `jsonld-to-ttl.py`,
+and runs `load-ttl.py` to replace the named graph `https://git.nfdi4plants.org/<arc_id>`.
+Relative RDF identifiers use this graph URL followed by `/ro-crate-metadata.json`
+as their base. JSON-LD and Turtle files are kept in the current directory.
+Progress is printed for each step; failed ARCs are reported and the remaining
+ARCs are still processed. The exit code is 1 if any ARC fails.
+
+To override the IDs, Fuseki host, or output directory:
+
+```powershell
+uv run .\scripts\fill-db.py 1040 122 --host localhost:3030 --output-dir .\tmp\crates
+```
+
 ### Convert RO-Crate metadata to Turtle
 
 Download e.g. https://git.nfdi4plants.org/brilator/Facultative-CAM-in-Talinum/-/package_files/89873/download, copy into this folder and rename to `ro-crate-metadata.json`. Then run:
@@ -125,8 +147,15 @@ are also accepted. You can load fresh data with `scripts/load-ttl.py` afterward.
 ### Query the RDF store
 
 ```powershell
-curl.exe --fail-with-body `        
-  -H "Accept: application/sparql-results+json" `   
-  --data-urlencode "query=SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 10" `                
-  "http://localhost:3030/ds/query"
+curl.exe --fail-with-body -H "Accept: application/sparql-results+json" --data-urlencode "query=SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 10"  "http://localhost:3030/ds/query"
+```
+
+### Named graphs
+
+`fill-db.py` loads each ARC into a named graph. Use `GRAPH ?g` to search all
+ARC graphs and include the graph IRI in each result. A pattern without `GRAPH`
+searches the default graph, which is empty when only ARC named graphs are loaded.
+
+```powershell
+curl.exe --fail-with-body -H "Accept: application/sparql-results+json" --data-urlencode "query=SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } } LIMIT 10" "http://localhost:3030/ds/query"
 ```
