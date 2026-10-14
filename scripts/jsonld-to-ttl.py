@@ -17,7 +17,7 @@ def convert_to_turtle(source: Path, destination: Path, base_iri: str | None = No
         raise ValueError("Input and output must be different files")
     if base_iri is not None and not urlsplit(base_iri).scheme:
         raise ValueError("The base IRI must be absolute, for example https://example.org/crate/")
-
+    
     graph = Graph()
     # Using the metadata document as the base resolves './', paths, and '#...' IDs.
     # RDFLib also fetches remote JSON-LD contexts declared by the metadata.

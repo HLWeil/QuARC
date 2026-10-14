@@ -59,12 +59,35 @@ written as UTF-8 with absolute resource identifiers.
 
 ### Load the Turtle into Apache Jena Fuseki
 
+#### Python
+
+With Fuseki running and updates enabled, run from the project root:
+
+```powershell
+uv run scripts/load-ttl.py
+```
+
+This adds the project-root `ro-crate-metadata.ttl` to the default graph at
+`http://localhost:3030/ds/data?default`. Existing data is preserved.
+
+To use another host or another Turtle file:
+
+```powershell
+uv run scripts/load-ttl.py --host 192.168.1.10:3030
+uv run scripts/load-ttl.py .\crate.ttl --host https://fuseki.example.org
+```
+
+Explicit file paths are relative to your working directory. The uploader uses
+Python's standard library and reports file, connection, and HTTP errors.
+
 #### Curl
 
+```powershell
 curl.exe --fail-with-body -X POST `
   -H "Content-Type: text/turtle" `
   --data-binary "@.\ro-crate-metadata.ttl" `
   "http://localhost:3030/ds/data?default"
+```
 
 
 #### TBD2
@@ -79,6 +102,25 @@ On Linux/macOS the command is `tdb2.tdbloader`. To load into a named graph,
 add `--graph=https://example.org/graph`. See the
 [Jena TDB2 command-line documentation](https://jena.apache.org/documentation/tdb2/tdb2_cmds.html).
 
+
+### Reset the RDF store
+
+With Fuseki running and updates enabled, run from the project root:
+
+```powershell
+uv run scripts/drop-db.py
+```
+
+To reset a dataset on another host:
+
+```powershell
+uv run scripts/drop-db.py --host 192.168.1.10:3030
+```
+
+This sends `DROP ALL` to `/ds/update`, deleting all RDF data in `/ds`, including
+named graphs. It keeps the dataset configuration and database files. The reset
+persists for TDB2 databases. The default host is `localhost:3030`; HTTP(S) URLs
+are also accepted. You can load fresh data with `scripts/load-ttl.py` afterward.
 
 ### Query the RDF store
 
