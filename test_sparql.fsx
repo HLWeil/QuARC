@@ -1,4 +1,5 @@
 let server = "http://localhost:3030/ds/query"
+let server2 = "192.52.43.238:3030/ds/query"
 
 let baseQueryString = "SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 10"
 
@@ -12,13 +13,13 @@ WHERE {
 ORDER BY ?person ?property
 """
 
-let studyNamesQueryString = """PREFIX schema: <https://schema.org/>
+let studyNamesQueryString = """PREFIX schema: <http://schema.org/>
 
 SELECT ?identifier
 WHERE {
-    ?dataset a schema:Dataset ;
-             schema:additionalType "Study" ;
-             schema:identifier ?identifier .
+  ?study a schema:Dataset ;
+          schema:additionalType "Study" ;
+          schema:identifier ?identifier .
 }
 """
 
